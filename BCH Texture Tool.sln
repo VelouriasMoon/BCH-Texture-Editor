@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCH Texture Tool", "BCH Texture Tool\BCH Texture Tool.csproj", "{B71DBCA5-62E8-47BF-AC3B-1F95AA71F516}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B71DBCA5-62E8-47BF-AC3B-1F95AA71F516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B71DBCA5-62E8-47BF-AC3B-1F95AA71F516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B71DBCA5-62E8-47BF-AC3B-1F95AA71F516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B71DBCA5-62E8-47BF-AC3B-1F95AA71F516}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47293E64-AA45-4E80-B260-8897A47A4B8C}
+	EndGlobalSection
+EndGlobal
