@@ -19,7 +19,7 @@ namespace BCH_Texture_Tool
         public Form1()
         {
             InitializeComponent();
-            groupBox1.Text = "";
+            label1.Text = "";
         }
         public H3D Scene;
 
@@ -130,7 +130,7 @@ namespace BCH_Texture_Tool
             if (texture.Width > 256)
             {
                 pictureBox1.Size = new Size(texture.Width, texture.Height);
-                pictureBox2.Location = new Point(pictureBox2.Location.X + (texture.Width - 256), pictureBox2.Location.Y);
+                pictureBox2.Location = new Point(270 + (texture.Width - 256), pictureBox2.Location.Y);
                 pictureBox2.Size = new Size(texture.Width, texture.Height);
                 treeView1.Height = groupBox1.Height + 29;
             }
