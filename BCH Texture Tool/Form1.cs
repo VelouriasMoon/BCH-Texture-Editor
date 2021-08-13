@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using SPICA.Formats.CtrH3D;
 using ImageMagick;
 using Microsoft.VisualBasic;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace BCH_Texture_Tool
 {
@@ -29,7 +30,11 @@ namespace BCH_Texture_Tool
             button2.Enabled = false;
             button3.Enabled = false;
             button4.Enabled = false;
+            button5.Enabled = false;
+            button6.Enabled = false;
+            button7.Enabled = false;
             saveToolStripMenuItem.Enabled = false;
+            exportAllToolStripMenuItem.Enabled = false;
             pictureBox1.Image = null;
             pictureBox2.Image = null;
             label1.Text = "";
@@ -66,6 +71,7 @@ namespace BCH_Texture_Tool
             Scene = new H3D();
             label1.Text = "New BCH File";
             saveToolStripMenuItem.Enabled = true;
+            exportAllToolStripMenuItem.Enabled = true;
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -75,7 +81,7 @@ namespace BCH_Texture_Tool
                 saveFileDialog.Filter = "BCH File (*.bch)|*.bch|All files (*.*)|*.*";
                 saveFileDialog.FilterIndex = 1;
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.Title = "Save Signal File";
+                saveFileDialog.Title = "Save BCH File";
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -99,6 +105,7 @@ namespace BCH_Texture_Tool
 
             button1.Enabled = true;
             saveToolStripMenuItem.Enabled = true;
+            exportAllToolStripMenuItem.Enabled = true;
             label1.Text = Path.GetFileName(infile);
 
             if (Scene.Textures.Count <= 0)
@@ -115,6 +122,9 @@ namespace BCH_Texture_Tool
             button2.Enabled = true;
             button3.Enabled = true;
             button4.Enabled = true;
+            button5.Enabled = true;
+            button6.Enabled = true;
+            button7.Enabled = true;
             MagickImage texture = new MagickImage(new MagickFactory().Image.Create(Scene.Textures[treeView1.SelectedNode.Index].ToBitmap()));
 
             
@@ -219,6 +229,114 @@ namespace BCH_Texture_Tool
 
             Scene.Textures[treeView1.SelectedNode.Index].Name = name;
             treeView1.SelectedNode.Text = name;
+        }
+
+        private void Export_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "PNG (*.png)|*.png|All files (*.*)|*.*";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.Title = "Save Texture Image";
+                saveFileDialog.FileName = treeView1.SelectedNode.Text;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Image texture = Scene.Textures[treeView1.SelectedNode.Index].ToBitmap();
+                    texture.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+        }
+
+        private void ExportSplit_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "PNG (*.png)|*.png|All files (*.*)|*.*";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+                saveFileDialog.Title = "Save Texture Image";
+                saveFileDialog.FileName = treeView1.SelectedNode.Text;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    pictureBox1.Image.Save($"{Path.GetDirectoryName(saveFileDialog.FileName)}\\{Path.GetFileNameWithoutExtension(saveFileDialog.FileName)}_RGB{Path.GetExtension(saveFileDialog.FileName)}", System.Drawing.Imaging.ImageFormat.Png);
+                    pictureBox2.Image.Save($"{Path.GetDirectoryName(saveFileDialog.FileName)}\\{Path.GetFileNameWithoutExtension(saveFileDialog.FileName)}_A{Path.GetExtension(saveFileDialog.FileName)}", System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+        }
+
+        private void exportAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (CommonOpenFileDialog commonOpenFileDialog = new CommonOpenFileDialog())
+            {
+                commonOpenFileDialog.IsFolderPicker = true;
+                commonOpenFileDialog.RestoreDirectory = true;
+                commonOpenFileDialog.Title = "Save Textures";
+
+                if (commonOpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    foreach (var texture in Scene.Textures)
+                    {
+                        Image image = texture.ToBitmap();
+                        image.Save($"{commonOpenFileDialog.FileName}\\{texture.Name}.png", System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+        }
+
+        private void ImportSplit_Click(object sender, EventArgs e)
+        {
+            string filename = "null";
+            MagickImage rgb = new MagickImage();
+            MagickImage alpha = new MagickImage();
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "PNG Image (*.png)|*.png";
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Title = "Open RGB Texture";
+                openFileDialog.Multiselect = false;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Bitmap newtexture = (Bitmap)Bitmap.FromFile(openFileDialog.FileName);
+                    pictureBox1.Image = newtexture;
+                    filename = Path.GetFileNameWithoutExtension(openFileDialog.FileName).Replace("_RGB", "");
+                    rgb = new MagickImage(new MagickImageFactory().Create(openFileDialog.FileName));
+                }
+                else
+                    return;
+            }
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "PNG Image (*.png)|*.png";
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Title = "Open Alpha Texture";
+                openFileDialog.Multiselect = false;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Bitmap newtexture = (Bitmap)Bitmap.FromFile(openFileDialog.FileName);
+                    pictureBox2.Image = newtexture;
+                    alpha = new MagickImage(new MagickImageFactory().Create(openFileDialog.FileName));
+                }
+                else
+                    return;
+            }
+
+            var splitrgb = rgb.Separate().ToList();
+            var newimage = new MagickImageCollection();
+            newimage.Add(splitrgb[0]);
+            newimage.Add(splitrgb[1]);
+            newimage.Add(splitrgb[2]);
+            newimage.Add(alpha);
+
+            Bitmap texture = newimage.Combine().ToBitmap();
+            var newtext = new SPICA.Formats.CtrH3D.Texture.H3DTexture(filename, texture, SPICA.PICA.Commands.PICATextureFormat.RGBA8);
+            Scene.Textures.Add(newtext);
+            treeView1.Nodes.Add(filename);
         }
     }
 }
