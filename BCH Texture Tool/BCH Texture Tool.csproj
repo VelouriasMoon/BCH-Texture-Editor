@@ -39,6 +39,9 @@
     <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
     </Reference>
+    <Reference Include="FE3D">
+      <HintPath>..\..\FE3D\FE3D\bin\Release\FE3D.dll</HintPath>
+    </Reference>
     <Reference Include="Magick.NET-Q16-AnyCPU, Version=8.2.0.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
       <HintPath>..\packages\Magick.NET-Q16-AnyCPU.8.2.1\lib\net20\Magick.NET-Q16-AnyCPU.dll</HintPath>
     </Reference>

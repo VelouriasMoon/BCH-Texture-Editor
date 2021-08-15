@@ -12,6 +12,7 @@ using SPICA.Formats.CtrH3D;
 using ImageMagick;
 using Microsoft.VisualBasic;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using FE3D.IO;
 
 namespace BCH_Texture_Tool
 {
