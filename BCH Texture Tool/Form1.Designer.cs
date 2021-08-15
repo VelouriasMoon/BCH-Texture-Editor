@@ -155,7 +155,7 @@ namespace BCH_Texture_Tool
             this.button1.TabIndex = 5;
             this.button1.Text = "Import";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.Import_Click);
             // 
             // button2
             // 
@@ -166,7 +166,7 @@ namespace BCH_Texture_Tool
             this.button2.TabIndex = 6;
             this.button2.Text = "Replace";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.Replace_Click);
             // 
             // button3
             // 
@@ -177,7 +177,7 @@ namespace BCH_Texture_Tool
             this.button3.TabIndex = 7;
             this.button3.Text = "Remove";
             this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button3.Click += new System.EventHandler(this.Remove_Click);
             // 
             // button4
             // 
@@ -188,7 +188,7 @@ namespace BCH_Texture_Tool
             this.button4.TabIndex = 8;
             this.button4.Text = "Rename";
             this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button4.Click += new System.EventHandler(this.Rename_Click);
             // 
             // button5
             // 

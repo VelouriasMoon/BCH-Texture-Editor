@@ -49,11 +49,12 @@ namespace BCH_Texture_Tool
             treeView1.Height = 318;
         }
 
+        #region Tool Strip
         private void Open_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "BCH or Lz File|*.bch,*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
+                openFileDialog.Filter = "BCH or Lz File|*.bch;*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
                 openFileDialog.RestoreDirectory = true;
                 openFileDialog.Title = "Open BCH File";
 
@@ -69,6 +70,7 @@ namespace BCH_Texture_Tool
             Reset();
             treeView1.Nodes.Clear();
             button1.Enabled = true;
+            button7.Enabled = true;
             Scene = new H3D();
             label1.Text = "New BCH File";
             saveToolStripMenuItem.Enabled = true;
@@ -79,7 +81,7 @@ namespace BCH_Texture_Tool
         {
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "BCH or Lz File|*.bch,*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
+                saveFileDialog.Filter = "BCH or Lz File|*.bch;*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
                 saveFileDialog.FilterIndex = 1;
                 saveFileDialog.RestoreDirectory = true;
                 saveFileDialog.Title = "Save BCH File";
@@ -103,6 +105,27 @@ namespace BCH_Texture_Tool
                 }
             }
         }
+
+        private void exportAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (CommonOpenFileDialog commonOpenFileDialog = new CommonOpenFileDialog())
+            {
+                commonOpenFileDialog.IsFolderPicker = true;
+                commonOpenFileDialog.RestoreDirectory = true;
+                commonOpenFileDialog.Title = "Save Textures";
+
+                if (commonOpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    foreach (var texture in Scene.Textures)
+                    {
+                        Image image = texture.ToBitmap();
+                        image.Save($"{commonOpenFileDialog.FileName}\\{texture.Name}.png", System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         private void OpenFile(string infile)
         {
@@ -181,7 +204,9 @@ namespace BCH_Texture_Tool
             groupBox1.Text = Scene.Textures[treeView1.SelectedNode.Index].Name;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        #region Buttons
+
+        private void Import_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -216,7 +241,7 @@ namespace BCH_Texture_Tool
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Replace_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -233,13 +258,13 @@ namespace BCH_Texture_Tool
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void Remove_Click(object sender, EventArgs e)
         {
             Scene.Textures.Remove(Scene.Textures[treeView1.SelectedNode.Index]);
             treeView1.Nodes.Remove(treeView1.SelectedNode);
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void Rename_Click(object sender, EventArgs e)
         {
             string name = Interaction.InputBox("New Texture Name", "New Texture Name", Scene.Textures[treeView1.SelectedNode.Index].Name).Replace(" ", "");
 
@@ -297,25 +322,6 @@ namespace BCH_Texture_Tool
             }
         }
 
-        private void exportAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (CommonOpenFileDialog commonOpenFileDialog = new CommonOpenFileDialog())
-            {
-                commonOpenFileDialog.IsFolderPicker = true;
-                commonOpenFileDialog.RestoreDirectory = true;
-                commonOpenFileDialog.Title = "Save Textures";
-
-                if (commonOpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
-                {
-                    foreach (var texture in Scene.Textures)
-                    {
-                        Image image = texture.ToBitmap();
-                        image.Save($"{commonOpenFileDialog.FileName}\\{texture.Name}.png", System.Drawing.Imaging.ImageFormat.Png);
-                    }
-                }
-            }
-        }
-
         private void ImportSplit_Click(object sender, EventArgs e)
         {
             string filename = "null";
@@ -368,5 +374,7 @@ namespace BCH_Texture_Tool
             Scene.Textures.Add(newtext);
             treeView1.Nodes.Add(filename);
         }
+
+        #endregion
     }
 }
