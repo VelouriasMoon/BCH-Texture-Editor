@@ -191,7 +191,7 @@ namespace BCH_Texture_Tool
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    Bitmap texture = (Bitmap)Bitmap.FromFile(openFileDialog.FileName);
+                    MagickImage texture = new MagickImage(new MagickImageFactory().Create(openFileDialog.FileName));
                     string filename = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                     int i = 0;
 
@@ -204,7 +204,12 @@ namespace BCH_Texture_Tool
                         }
                     }
 
-                    var newtext = new SPICA.Formats.CtrH3D.Texture.H3DTexture(filename, texture, SPICA.PICA.Commands.PICATextureFormat.RGBA8);
+                    if (!texture.HasAlpha)
+                    {
+                        texture.Alpha(AlphaOption.Opaque);
+                    }
+
+                    var newtext = new SPICA.Formats.CtrH3D.Texture.H3DTexture(filename, texture.ToBitmap(), SPICA.PICA.Commands.PICATextureFormat.RGBA8);
                     Scene.Textures.Add(newtext);
                     treeView1.Nodes.Add(filename);
                 }
