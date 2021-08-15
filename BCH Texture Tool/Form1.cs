@@ -53,7 +53,7 @@ namespace BCH_Texture_Tool
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "BCH File (*.bch)|*.bch|All files (*.*)|*.*";
+                openFileDialog.Filter = "BCH or Lz File|*.bch,*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
                 openFileDialog.RestoreDirectory = true;
                 openFileDialog.Title = "Open BCH File";
 
@@ -79,7 +79,7 @@ namespace BCH_Texture_Tool
         {
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "BCH File (*.bch)|*.bch|All files (*.*)|*.*";
+                saveFileDialog.Filter = "BCH or Lz File|*.bch,*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
                 saveFileDialog.FilterIndex = 1;
                 saveFileDialog.RestoreDirectory = true;
                 saveFileDialog.Title = "Save BCH File";
@@ -87,6 +87,19 @@ namespace BCH_Texture_Tool
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     H3D.Save(saveFileDialog.FileName, Scene);
+                    if (Path.GetExtension(saveFileDialog.FileName) == ".lz")
+                    {
+                        byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(saveFileDialog.FileName));
+                        byte[] lz13 = new byte[file.Length + 4];
+
+                        lz13[0] = 0x13;
+                        Array.Copy(file, 0, lz13, 4, file.Length);
+                        Array.Copy(file, 1, lz13, 1, 3);
+
+                        File.Delete(saveFileDialog.FileName);
+                        File.WriteAllBytes(saveFileDialog.FileName, lz13);
+                    }
+                    
                 }
             }
         }
@@ -95,7 +108,18 @@ namespace BCH_Texture_Tool
         {
             Reset();
             treeView1.Nodes.Clear();
-            Scene = H3D.Open(File.ReadAllBytes(infile));
+            byte[] file = File.ReadAllBytes(infile);
+
+            if (Path.GetExtension(infile) == ".lz" && file[0] == 0x13 && file[4] == 0x11)
+            {
+                file = file.Skip(4).ToArray();
+                file = FEIO.LZ11Decompress(file);
+            }
+
+            if (FEIO.GetMagic(file) != "BCH")
+                return;
+
+            Scene = H3D.Open(file);
 
             if (Scene.Models.Count > 0)
             {
