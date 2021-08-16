@@ -54,13 +54,16 @@ namespace BCH_Texture_Tool
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "BCH or Lz File|*.bch;*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
+                openFileDialog.Filter = "Compatible File|*.bch;*.lz;*.arc|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|Arc File (*.arc)|*.arc|All files (*.*)|*.*";
                 openFileDialog.RestoreDirectory = true;
-                openFileDialog.Title = "Open BCH File";
+                openFileDialog.Title = "Open File";
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    OpenFile(openFileDialog.FileName);
+                    if (Path.GetExtension(openFileDialog.FileName) == ".arc")
+                        OpenArc(openFileDialog.FileName);
+                    else
+                        OpenFile(openFileDialog.FileName);
                 }
             }
         }
@@ -81,27 +84,33 @@ namespace BCH_Texture_Tool
         {
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "BCH or Lz File|*.bch;*.lz|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|All files (*.*)|*.*";
+                saveFileDialog.Filter = "Compatible File|*.bch;*.lz;*.arc|BCH File (*.bch)|*.bch|Lz File (*.lz)|*.lz|Arc File (*.arc)|*.arc|All files (*.*)|*.*";
                 saveFileDialog.FilterIndex = 1;
                 saveFileDialog.RestoreDirectory = true;
-                saveFileDialog.Title = "Save BCH File";
+                saveFileDialog.Title = "Save File";
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    H3D.Save(saveFileDialog.FileName, Scene);
-                    if (Path.GetExtension(saveFileDialog.FileName) == ".lz")
+                    if (Path.GetExtension(saveFileDialog.FileName) == ".arc")
                     {
-                        byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(saveFileDialog.FileName));
-                        byte[] lz13 = new byte[file.Length + 4];
-
-                        lz13[0] = 0x13;
-                        Array.Copy(file, 0, lz13, 4, file.Length);
-                        Array.Copy(file, 1, lz13, 1, 3);
-
-                        File.Delete(saveFileDialog.FileName);
-                        File.WriteAllBytes(saveFileDialog.FileName, lz13);
+                        SaveArc(saveFileDialog.FileName);
                     }
-                    
+                    else
+                    {
+                        H3D.Save(saveFileDialog.FileName, Scene);
+                        if (Path.GetExtension(saveFileDialog.FileName) == ".lz")
+                        {
+                            byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(saveFileDialog.FileName));
+                            byte[] lz13 = new byte[file.Length + 4];
+
+                            lz13[0] = 0x13;
+                            Array.Copy(file, 0, lz13, 4, file.Length);
+                            Array.Copy(file, 1, lz13, 1, 3);
+
+                            File.Delete(saveFileDialog.FileName);
+                            File.WriteAllBytes(saveFileDialog.FileName, lz13);
+                        }
+                    }
                 }
             }
         }
@@ -163,6 +172,75 @@ namespace BCH_Texture_Tool
             {
                 treeView1.Nodes.Add(texture.Name);
             }
+        }
+
+        private void OpenArc(string infile)
+        {
+            Reset();
+            treeView1.Nodes.Clear();
+            Scene = new H3D();
+            byte[] bch = File.ReadAllBytes(infile);
+            List<byte[]> compressedfiles = FE3D.FEArc.ExtractArcToMemory(bch);
+            string[] names = FE3D.FEArc.ExtractArcNames(bch);
+            int i = 0;
+
+            foreach (byte[] file in compressedfiles)
+            {
+                bch = FEIO.LZ11Decompress(file.Skip(4).ToArray());
+
+                if (FEIO.GetMagic(bch) != "BCH")
+                    continue;
+
+                H3D NewBch = H3D.Open(bch);
+                NewBch.Textures[0].Name = names[i].Replace(".bch.lz","");
+
+                Scene.Textures.Add(NewBch.Textures[0]);
+                i++;
+            }
+
+            button1.Enabled = true;
+            saveToolStripMenuItem.Enabled = true;
+            exportAllToolStripMenuItem.Enabled = true;
+            label1.Text = Path.GetFileName(infile);
+
+            if (Scene.Textures.Count <= 0)
+                return;
+
+            foreach (var texture in Scene.Textures)
+            {
+                treeView1.Nodes.Add(texture.Name);
+            }
+        }
+
+        private void SaveArc(string outname)
+        {
+            if (File.Exists(outname))
+                File.Delete(outname);
+            List<byte[]> arcfiles = new List<byte[]>();
+            List<string> names = new List<string>();
+            foreach (var texture in Scene.Textures)
+            {
+                H3D NewBch = new H3D();
+                NewBch.Textures.Add(texture);
+                string filename = $"{NewBch.Textures[0].Name}.bch.lz";
+                NewBch.Textures[0].Name = "tmp";
+
+                H3D.Save(outname, NewBch);
+
+                byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(outname));
+                byte[] lz13 = new byte[file.Length + 4];
+
+                lz13[0] = 0x13;
+                Array.Copy(file, 0, lz13, 4, file.Length);
+                Array.Copy(file, 1, lz13, 1, 3);
+
+                File.Delete(outname);
+                arcfiles.Add(lz13);
+                names.Add(filename);
+            }
+
+            byte[] arcfile = FE3D.FEArc.CreatArcFromMemory(arcfiles, names.ToArray());
+            File.WriteAllBytes(outname, arcfile);
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
