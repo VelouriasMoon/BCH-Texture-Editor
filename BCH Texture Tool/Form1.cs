@@ -230,6 +230,9 @@ namespace BCH_Texture_Tool
                 NewBch.Textures.Add(texture);
                 string filename = $"{NewBch.Textures[0].Name}.bch.lz";
                 NewBch.Textures[0].Name = "tmp";
+                NewBch.ConverterVersion = 44139;
+                NewBch.BackwardCompatibility = 34;
+                NewBch.ForwardCompatibility = 35;
 
                 H3D.Save(outname, NewBch);
 
