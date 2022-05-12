@@ -99,18 +99,15 @@ namespace BCH_Texture_Tool
                     }
                     else
                     {
-                        H3D.Save(saveFileDialog.FileName, Scene);
                         if (Path.GetExtension(saveFileDialog.FileName) == ".lz")
                         {
-                            byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(saveFileDialog.FileName));
-                            byte[] lz13 = new byte[file.Length + 4];
+                            byte[] file = FEIO.LZ13Compress(H3D.Save(Scene));
 
-                            lz13[0] = 0x13;
-                            Array.Copy(file, 0, lz13, 4, file.Length);
-                            Array.Copy(file, 1, lz13, 1, 3);
-
-                            File.Delete(saveFileDialog.FileName);
-                            File.WriteAllBytes(saveFileDialog.FileName, lz13);
+                            File.WriteAllBytes(saveFileDialog.FileName, file);
+                        }
+                        else
+                        {
+                            H3D.Save(saveFileDialog.FileName, Scene);
                         }
                     }
                 }
@@ -234,17 +231,9 @@ namespace BCH_Texture_Tool
                 NewBch.BackwardCompatibility = 34;
                 NewBch.ForwardCompatibility = 35;
 
-                H3D.Save(outname, NewBch);
+                byte[] file = FEIO.LZ13Compress(H3D.Save(NewBch));
 
-                byte[] file = FEIO.LZ11Compress(File.ReadAllBytes(outname));
-                byte[] lz13 = new byte[file.Length + 4];
-
-                lz13[0] = 0x13;
-                Array.Copy(file, 0, lz13, 4, file.Length);
-                Array.Copy(file, 1, lz13, 1, 3);
-
-                File.Delete(outname);
-                arcfiles.Add(lz13);
+                arcfiles.Add(file);
                 names.Add(filename);
             }
 
