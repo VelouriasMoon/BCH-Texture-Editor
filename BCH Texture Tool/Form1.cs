@@ -13,6 +13,8 @@ using ImageMagick;
 using Microsoft.VisualBasic;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using FE3D.IO;
+using FE3D;
+using FE3D.GovanifY;
 
 namespace BCH_Texture_Tool
 {
@@ -179,20 +181,24 @@ namespace BCH_Texture_Tool
             Reset();
             treeView1.Nodes.Clear();
             Scene = new H3D();
-            byte[] bch = File.ReadAllBytes(infile);
-            List<byte[]> compressedfiles = FE3D.FEArc.ExtractArcToMemory(bch);
-            string[] names = FE3D.FEArc.ExtractArcNames(bch);
+            FEArc arc = new FEArc();
+
+            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(infile)))
+            {
+                BinaryStream bs = new BinaryStream(ms);
+                arc.Read(bs);
+            }
             int i = 0;
 
-            foreach (byte[] file in compressedfiles)
+            foreach (byte[] file in arc.Files)
             {
-                bch = FEIO.LZ11Decompress(file.Skip(4).ToArray());
+                byte[] bch = FEIO.LZ11Decompress(file.Skip(4).ToArray());
 
                 if (FEIO.GetMagic(bch) != "BCH")
                     continue;
 
                 H3D NewBch = H3D.Open(bch);
-                NewBch.Textures[0].Name = names[i].Replace(".bch.lz","");
+                NewBch.Textures[0].Name = arc.FileNames[i].Replace(".bch.lz","");
 
                 Scene.Textures.Add(NewBch.Textures[0]);
                 i++;
@@ -239,8 +245,16 @@ namespace BCH_Texture_Tool
                 names.Add(filename);
             }
 
-            byte[] arcfile = FE3D.FEArc.CreatArcFromMemory(arcfiles, names.ToArray());
-            File.WriteAllBytes(outname, arcfile);
+            using (FileStream fs = new FileStream(outname, FileMode.Create))
+            {
+                BinaryStream bs = new BinaryStream(fs);
+                FEArc arc = new FEArc();
+
+                arc.Files = arcfiles;
+                arc.FileNames = names;
+
+                arc.Write(bs);
+            }
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)

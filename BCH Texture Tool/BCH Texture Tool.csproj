@@ -55,10 +55,9 @@
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack-Shell.1.1.1\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
-    <Reference Include="SPICA">
-      <HintPath>..\..\..\..\..\..\Downloads\Tools\Spica\New folder\SPICA.dll</HintPath>
+    <Reference Include="System">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -109,6 +108,10 @@
     <Content Include="Background.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FE3D\FE3D.Graphics\FE3D.Graphics.csproj">
+      <Project>{c4346b87-3a7f-47e3-9368-653ae15959f4}</Project>
+      <Name>FE3D.Graphics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\FE3D\FE3D\FE3D.csproj">
       <Project>{5b7b0d72-dc09-4344-a8c6-f616c23dd20b}</Project>
       <Name>FE3D</Name>
